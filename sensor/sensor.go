@@ -10,12 +10,22 @@
 
 package sensor
 
+import "time"
+
 // Sensor represents virtual sensor that
 // only generate random data with given generator
 type Sensor struct {
-	id   int
-	Name string
+	id     int
+	Name   string
+	Buffer chan Data
 	// TODO Generator
+}
+
+// Data represents sensor data that contains
+// time and value
+type Data struct {
+	Time  time.Time
+	Value string
 }
 
 // New creates new sensor and store its user given script
