@@ -13,6 +13,18 @@ package sensor
 // Sensor represents virtual sensor that
 // only generate random data with given generator
 type Sensor struct {
+	id   int
 	Name string
 	// TODO Generator
+}
+
+// New creates new sensor and store its user given script
+func New(name string, script []byte) *Sensor {
+	return &Sensor{}
+}
+
+// Run runs sensor, running sensor generate data using
+// user given script.
+// it is a blocking function so run it in new thread
+func (s *Sensor) Run() {
 }
