@@ -10,7 +10,11 @@
 
 package sensor
 
-import "time"
+import (
+	"fmt"
+	"os"
+	"time"
+)
 
 // Sensor represents virtual sensor that
 // only generate random data with given generator
@@ -29,8 +33,18 @@ type Data struct {
 }
 
 // New creates new sensor and store its user given script
-func New(name string, script []byte) *Sensor {
-	return &Sensor{}
+func New(name string, script []byte) (*Sensor, error) {
+	// Store user script
+	f, err := os.Create(fmt.Sprintf("/tmp/%s.py", name))
+	if err != nil {
+		return nil, err
+	}
+	f.Write(script)
+
+	return &Sensor{
+		Name:   name,
+		Buffer: make(chan Data, 1024),
+	}, nil
 }
 
 // Run runs sensor, running sensor generate data using
