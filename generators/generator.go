@@ -8,7 +8,7 @@
  * +===============================================
  */
 
-package generator
+package generators
 
 // Generator provides a general way for generating load
 // Generate calls in each iteration and returns number
