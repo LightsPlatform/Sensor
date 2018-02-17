@@ -58,14 +58,16 @@ func (s *Sensor) Run() {
 	for {
 		select {
 		case <-t:
-			cmd := exec.Command("runtime.py", "--job", "rule", fmt.Sprintf("/tmp/sensor-%s.py", s.Name))
+			cmd := exec.Command("runtime.py", fmt.Sprintf("/tmp/sensor-%s.py", s.Name))
 
 			// run
-			if _, err := cmd.Output(); err != nil {
+			data, err := cmd.Output()
+			if err != nil {
 				if err, ok := err.(*exec.ExitError); ok {
 					log.Errorf("%s: %s", err.Error(), err.Stderr)
 				}
 			}
+			log.Infof("%s", data)
 		}
 	}
 }
