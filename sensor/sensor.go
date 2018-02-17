@@ -23,9 +23,12 @@ import (
 // Sensor represents virtual sensor that
 // only generate random data with given generator
 type Sensor struct {
-	id     int
-	Name   string
+	id   int
+	Name string
+
 	Buffer chan Data
+	quit   chan struct{}
+
 	// TODO Generator
 }
 
@@ -48,7 +51,16 @@ func New(name string, script []byte) (*Sensor, error) {
 	return &Sensor{
 		Name:   name,
 		Buffer: make(chan Data, 1024),
+		quit:   make(chan struct{}, 0),
 	}, nil
+}
+
+// Stop stops running sensor
+func (s *Sensor) Stop() {
+	s.quit <- struct{}{}
+
+	close(s.quit)
+	close(s.Buffer)
 }
 
 // Run runs sensor, running sensor generate data using
@@ -76,6 +88,8 @@ func (s *Sensor) Run() {
 
 			log.Infoln(d)
 			s.Buffer <- d
+		case <-s.quit:
+			return
 		}
 	}
 }
