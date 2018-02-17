@@ -23,8 +23,11 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var sensors map[string]*sensor.Sensor
+
 // init initiates global variables
 func init() {
+	sensors = make(map[string]*sensor.Sensor)
 }
 
 // handle registers apis and create http handler
@@ -36,6 +39,7 @@ func handle() http.Handler {
 		api.GET("/about", aboutHandler)
 
 		api.POST("/sensor/:id", sensorHandler)
+		api.GET("/sensor/:id/data", dataHandler)
 	}
 
 	r.NoRoute(func(c *gin.Context) {
@@ -92,7 +96,33 @@ func sensorHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	go sensor.Run()
+	if _, ok := sensors[id]; !ok {
+		go sensor.Run()
+	}
+	sensors[id] = sensor
 
 	c.String(http.StatusOK, id)
+}
+
+func dataHandler(c *gin.Context) {
+	id := c.Param("id")
+	data := make([]sensor.Data, 0)
+
+	sensor, ok := sensors[id]
+	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("Sensor %s was not found on vSensor", id)})
+		return
+	}
+
+	exists := true
+	for exists {
+		select {
+		case d := <-sensor.Buffer:
+			data = append(data, d)
+		default:
+			exists = false
+		}
+	}
+
+	c.JSON(http.StatusOK, data)
 }
