@@ -11,6 +11,7 @@
 package sensor
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -32,7 +33,7 @@ type Sensor struct {
 // time and value
 type Data struct {
 	Time  time.Time
-	Value string
+	Value interface{}
 }
 
 // New creates new sensor and store its user given script
@@ -61,13 +62,20 @@ func (s *Sensor) Run() {
 			cmd := exec.Command("runtime.py", fmt.Sprintf("/tmp/sensor-%s.py", s.Name))
 
 			// run
-			data, err := cmd.Output()
+			value, err := cmd.Output()
 			if err != nil {
 				if err, ok := err.(*exec.ExitError); ok {
 					log.Errorf("%s: %s", err.Error(), err.Stderr)
 				}
 			}
-			log.Infof("%s", data)
+
+			d := Data{
+				Time: time.Now(),
+			}
+			json.Unmarshal(value, &d.Value)
+
+			log.Infoln(d)
+			s.Buffer <- d
 		}
 	}
 }
