@@ -13,7 +13,10 @@ package sensor
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Sensor represents virtual sensor that
@@ -35,7 +38,7 @@ type Data struct {
 // New creates new sensor and store its user given script
 func New(name string, script []byte) (*Sensor, error) {
 	// Store user script
-	f, err := os.Create(fmt.Sprintf("/tmp/%s.py", name))
+	f, err := os.Create(fmt.Sprintf("/tmp/sensor-%s.py", name))
 	if err != nil {
 		return nil, err
 	}
@@ -51,4 +54,18 @@ func New(name string, script []byte) (*Sensor, error) {
 // user given script.
 // it is a blocking function so run it in new thread
 func (s *Sensor) Run() {
+	t := time.Tick(1 * time.Second)
+	for {
+		select {
+		case <-t:
+			cmd := exec.Command("runtime.py", "--job", "rule", fmt.Sprintf("/tmp/sensor-%s.py", s.Name))
+
+			// run
+			if _, err := cmd.Output(); err != nil {
+				if err, ok := err.(*exec.ExitError); ok {
+					log.Errorf("%s: %s", err.Error(), err.Stderr)
+				}
+			}
+		}
+	}
 }
