@@ -92,7 +92,7 @@ func sensorHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	sensor.Run()
+	go sensor.Run()
 
 	c.String(http.StatusOK, id)
 }
