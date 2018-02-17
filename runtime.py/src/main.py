@@ -8,8 +8,8 @@
 # [] Created By : Parham Alvani <parham.alvani@gmail.com>
 # =======================================
 import click
-import base64
 import runpy
+import json
 
 from sensor import Sensor
 
@@ -31,7 +31,7 @@ def run(target):
         return
 
     d = sensor().value()
-    print(d)
+    print(json.dumps(d))
 
 def main():
     run()
