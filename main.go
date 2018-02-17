@@ -38,8 +38,9 @@ func handle() http.Handler {
 	{
 		api.GET("/about", aboutHandler)
 
-		api.POST("/sensor/:id", sensorHandler)
-		api.GET("/sensor/:id/data", dataHandler)
+		api.POST("/sensor/:id", sensorCreateHandler)
+		api.GET("/sensor/:id/data", sensorDataHandler)
+		api.DELETE("/sensor/:id", sensorDeleteHandler)
 	}
 
 	r.NoRoute(func(c *gin.Context) {
@@ -83,7 +84,7 @@ func aboutHandler(c *gin.Context) {
 	c.String(http.StatusOK, "18.20 is leaving us")
 }
 
-func sensorHandler(c *gin.Context) {
+func sensorCreateHandler(c *gin.Context) {
 	id := c.Param("id")
 	data, err := c.GetRawData()
 	if err != nil {
@@ -104,7 +105,7 @@ func sensorHandler(c *gin.Context) {
 	c.String(http.StatusOK, id)
 }
 
-func dataHandler(c *gin.Context) {
+func sensorDataHandler(c *gin.Context) {
 	id := c.Param("id")
 	data := make([]sensor.Data, 0)
 
@@ -123,6 +124,27 @@ func dataHandler(c *gin.Context) {
 			exists = false
 		}
 	}
+
+	c.JSON(http.StatusOK, data)
+}
+
+func sensorDeleteHandler(c *gin.Context) {
+	id := c.Param("id")
+	data := make([]sensor.Data, 0)
+
+	sensor, ok := sensors[id]
+	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("Sensor %s was not found on vSensor", id)})
+		return
+	}
+
+	sensor.Stop()
+
+	for d := range sensor.Buffer {
+		data = append(data, d)
+	}
+
+	delete(sensors, id)
 
 	c.JSON(http.StatusOK, data)
 }
