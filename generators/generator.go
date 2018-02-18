@@ -14,5 +14,5 @@ package generators
 // Generate calls in each iteration and returns number
 // of packets that must be generated.
 type Generator interface {
-	Generate() int
+	Generate() <-chan int
 }
