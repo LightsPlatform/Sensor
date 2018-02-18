@@ -17,6 +17,7 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/LightsPlatform/vSensor/generators"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -29,7 +30,7 @@ type Sensor struct {
 	Buffer chan Data
 	quit   chan struct{}
 
-	// TODO Generator
+	gen generators.Generator
 }
 
 // Data represents sensor data that contains
@@ -67,27 +68,30 @@ func (s *Sensor) Stop() {
 // user given script.
 // it is a blocking function so run it in new thread
 func (s *Sensor) Run() {
-	t := time.Tick(1 * time.Second)
+	g := s.gen.Generate()
+
 	for {
 		select {
-		case <-t:
-			cmd := exec.Command("runtime.py", fmt.Sprintf("/tmp/sensor-%s.py", s.Name))
+		case c := <-g:
+			for i := 0; i < c; i++ {
+				cmd := exec.Command("runtime.py", fmt.Sprintf("/tmp/sensor-%s.py", s.Name))
 
-			// run
-			value, err := cmd.Output()
-			if err != nil {
-				if err, ok := err.(*exec.ExitError); ok {
-					log.Errorf("%s: %s", err.Error(), err.Stderr)
+				// run
+				value, err := cmd.Output()
+				if err != nil {
+					if err, ok := err.(*exec.ExitError); ok {
+						log.Errorf("%s: %s", err.Error(), err.Stderr)
+					}
 				}
-			}
 
-			d := Data{
-				Time: time.Now(),
-			}
-			json.Unmarshal(value, &d.Value)
+				d := Data{
+					Time: time.Now(),
+				}
+				json.Unmarshal(value, &d.Value)
 
-			log.Infoln(d)
-			s.Buffer <- d
+				log.Infoln(d)
+				s.Buffer <- d
+			}
 		case <-s.quit:
 			return
 		}
