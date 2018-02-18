@@ -53,6 +53,8 @@ func New(name string, script []byte) (*Sensor, error) {
 		Name:   name,
 		Buffer: make(chan Data, 1024),
 		quit:   make(chan struct{}, 0),
+
+		gen: generators.UniformGenerator{Timeslot: 1 * time.Second},
 	}, nil
 }
 
