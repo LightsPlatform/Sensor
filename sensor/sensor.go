@@ -25,9 +25,9 @@ import (
 // only generate random data with given generator
 type Sensor struct {
 	id   int
-	Name string
+	Name string `json:"name"`
 
-	Buffer chan Data
+	Buffer chan Data `json:"-"`
 	quit   chan struct{}
 
 	gen generators.Generator
@@ -85,16 +85,21 @@ func (s *Sensor) Run() {
 				if err != nil {
 					if err, ok := err.(*exec.ExitError); ok {
 						log.Errorf("%s: %s", err.Error(), err.Stderr)
+						continue
 					}
 				}
 
 				d := Data{
 					Time: time.Now(),
 				}
-				json.Unmarshal(value, &d.Value)
 
-				log.Infoln(d)
-				s.Buffer <- d
+				if err := json.Unmarshal(value, &d.Value); err == nil {
+					log.Infoln(d)
+					s.Buffer <- d
+				} else {
+					log.Errorf("%s", err)
+				}
+
 			}
 		case <-s.quit:
 			return

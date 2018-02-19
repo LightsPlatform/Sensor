@@ -40,6 +40,7 @@ func handle() http.Handler {
 
 		api.POST("/sensor/:id", sensorCreateHandler)
 		api.GET("/sensor/:id/data", sensorDataHandler)
+		api.GET("/sensor/", sensorListHandler)
 		api.DELETE("/sensor/:id", sensorDeleteHandler)
 	}
 
@@ -103,6 +104,10 @@ func sensorCreateHandler(c *gin.Context) {
 	sensors[id] = sensor
 
 	c.String(http.StatusOK, id)
+}
+
+func sensorListHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, sensors)
 }
 
 func sensorDataHandler(c *gin.Context) {

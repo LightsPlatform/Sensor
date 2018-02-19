@@ -22,17 +22,9 @@
 
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/aiotrc/GoRunner"
-
-[[constraint]]
   name = "github.com/gin-gonic/gin"
   version = "1.2.0"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
   version = "1.0.4"
-
-[[constraint]]
-  branch = "master"
-  name = "github.com/weekface/mgorus"
