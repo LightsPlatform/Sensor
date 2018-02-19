@@ -24,7 +24,7 @@ import (
 // Sensor represents virtual sensor that
 // only generate random data with given generator
 type Sensor struct {
-	id   int    `json:"id"`
+	id   int
 	Name string `json:"name"`
 
 	Buffer chan Data `json:"-"`
