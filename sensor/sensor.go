@@ -27,7 +27,7 @@ type Sensor struct {
 	id   int    `json:"id"`
 	Name string `json:"name"`
 
-	Buffer chan Data
+	Buffer chan Data `json:"-"`
 	quit   chan struct{}
 
 	gen generators.Generator
