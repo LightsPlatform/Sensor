@@ -107,8 +107,8 @@ func sensorCreateHandler(c *gin.Context) {
 }
 
 func sensorListHandler(c *gin.Context) {
-	output := make([]string,0)
-	for _,sensor := range sensors{
+	output := make([]string, 0)
+	for _, sensor := range sensors {
 		output = append(output, sensor.Name)
 	}
 	c.JSON(http.StatusOK, output)
