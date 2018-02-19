@@ -43,7 +43,8 @@ type Data struct {
 // New creates new sensor and store its user given script
 func New(name string, script []byte) (*Sensor, error) {
 	// Store user script
-	f, err := os.Create(fmt.Sprintf("/tmp/sensor-%s.py", name))
+	path := os.TempDir() + "/sensor-%s.py"
+	f, err := os.Create(fmt.Sprintf(path, name))
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +77,8 @@ func (s *Sensor) Run() {
 		select {
 		case c := <-g:
 			for i := 0; i < c; i++ {
-				cmd := exec.Command("runtime.py", fmt.Sprintf("/tmp/sensor-%s.py", s.Name))
+				path := os.TempDir() + "/sensor-%s.py"
+				cmd := exec.Command("runtime.py", fmt.Sprintf(path, s.Name))
 
 				// run
 				value, err := cmd.Output()
