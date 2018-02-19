@@ -24,8 +24,8 @@ import (
 // Sensor represents virtual sensor that
 // only generate random data with given generator
 type Sensor struct {
-	id   int
-	Name string
+	id   int    `json:"id"`
+	Name string `json:"name"`
 
 	Buffer chan Data
 	quit   chan struct{}
@@ -83,16 +83,21 @@ func (s *Sensor) Run() {
 				if err != nil {
 					if err, ok := err.(*exec.ExitError); ok {
 						log.Errorf("%s: %s", err.Error(), err.Stderr)
+						continue
 					}
 				}
 
 				d := Data{
 					Time: time.Now(),
 				}
-				json.Unmarshal(value, &d.Value)
 
-				log.Infoln(d)
-				s.Buffer <- d
+				if err := json.Unmarshal(value, &d.Value); err == nil {
+					log.Infoln(d)
+					s.Buffer <- d
+				} else {
+					log.Errorf("%s", err)
+				}
+
 			}
 		case <-s.quit:
 			return
