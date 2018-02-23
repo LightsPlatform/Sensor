@@ -12,4 +12,4 @@ WORKDIR /app
 COPY --from=build-env /vSensor /app/
 COPY runtime.py /app/runtime.py
 RUN cd /app/runtime.py && python3 setup.py install
-ENTRYPOINT ["./GoRunner"]
+ENTRYPOINT ["./vSensor"]
